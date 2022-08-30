@@ -88,12 +88,13 @@ def plot_histogram(data, column_code, value_codes):
         # Get the list of value codes
         val_codes = np.array([int(code) for code in value_codes[column_code].keys()])
         # Explicitly state the number of bins to avoid different response codes being grouped together
-        bins = np.linspace(min(val_codes), max(val_codes), len(val_codes)+1)
+        bins = np.arange(min(val_codes), max(val_codes)+2, 1) - 0.5
 
         ax.hist(data[column_code], color='tab:orange',
                 bins=bins,
-                align='mid')
-        ax.set_xticks(val_codes + 0.5,
+                align='mid',
+                rwidth=0.9)
+        ax.set_xticks(val_codes,
                         labels=value_codes[column_code].values(),
                         rotation=90)
     else:
@@ -117,6 +118,6 @@ if __name__ == "__main__":
             value_codes[dataset] = yaml.safe_load(val_codes)
             column_codes[dataset] = yaml.safe_load(col_codes)
 
-    responses= pd.read_csv(f"respondents/atusresp_0321.csv")
+    responses= pd.read_csv(f"roster/atusrost_0321.csv")
     
-    plot_histogram(responses, 'TRDTOCC1', value_codes['respondents'])
+    plot_histogram(responses, 'TERRP', value_codes['roster'])
