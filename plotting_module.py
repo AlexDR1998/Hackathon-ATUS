@@ -38,7 +38,7 @@ def make_chart_pie(x, values, data):
     return output
 
 def plot_all_histograms(data, column_codes, value_codes, output_folder):
-    """Plots a histogram of responses to each question (column tag) asked in the survey.
+    """Plots a histogram of responses to each question (column column_code) asked in the survey.
     Saves the results to a output_folder.
 
     Args:
@@ -48,29 +48,62 @@ def plot_all_histograms(data, column_codes, value_codes, output_folder):
         output_folder (str): Folder to save plots to
     """
     # Iterate over each of the questions in the survey
-    for tag in column_codes:
+    for column_code in column_codes:
         fig, ax = plt.subplots(figsize=(11.75, 8.25))
-        # If the tag exists in values_codes.yaml then the data is discrete
-        if tag in value_codes:
+        # If the column_code exists in values_codes.yaml then the data is discrete
+        if column_code in value_codes:
             # Get the list of value codes
-            val_codes = np.array([int(code) for code in value_codes[tag].keys()])
+            val_codes = np.array([int(code) for code in value_codes[column_code].keys()])
             # Explicitly state the number of bins to avoid different response codes being grouped together
             bins = np.linspace(min(val_codes), max(val_codes), len(val_codes)+1)
 
-            ax.hist(data[tag], color='tab:orange',
+            ax.hist(data[column_code], color='tab:orange',
                     bins=bins,
                     align='mid')
             ax.set_xticks(val_codes + 0.5,
-                          labels=value_codes[tag].values(),
+                          labels=value_codes[column_code].values(),
                           rotation=90)
         else:
-            ax.hist(data[tag])
+            ax.hist(data[column_code])
 
-        ax.set_title(f"{tag:}: {column_codes[tag]:}")
+        ax.set_title(f"{column_code:}: {column_codes[column_code]:}")
         ax.set_xlabel('Response')
         ax.set_ylabel('Number of responses')
-        plt.savefig(f"{output_folder:}/{tag:}.png")
+        plt.savefig(f"{output_folder:}/{column_code:}.png")
         plt.close()
+        
+def plot_histogram(data, column_code, value_codes):
+    """Plots a histogram of responses to each question (column column_code) asked in the survey.
+    Saves the results to a output_folder.
+
+    Args:
+        data (Pandas dataframe): Dataframe containing the responses to the survey
+        column_codes (str): Question (column) code
+        value_codes (dict): Dictionary of the response (value) codes for questions with discrete answers
+        output_folder (str): Folder to save plots to
+    """
+    fig, ax = plt.subplots(figsize=(11.75, 8.25))
+    # If the column_code exists in values_codes.yaml then the data is discrete
+    if column_code in value_codes:
+        # Get the list of value codes
+        val_codes = np.array([int(code) for code in value_codes[column_code].keys()])
+        # Explicitly state the number of bins to avoid different response codes being grouped together
+        bins = np.linspace(min(val_codes), max(val_codes), len(val_codes)+1)
+
+        ax.hist(data[column_code], color='tab:orange',
+                bins=bins,
+                align='mid')
+        ax.set_xticks(val_codes + 0.5,
+                        labels=value_codes[column_code].values(),
+                        rotation=90)
+    else:
+        ax.hist(data[column_code])
+
+    ax.set_title(f"{column_code:}")
+    ax.set_xlabel('Response')
+    ax.set_ylabel('Number of responses')
+    fig.tight_layout()
+    plt.show()
         
         
 if __name__ == "__main__":
@@ -80,10 +113,10 @@ if __name__ == "__main__":
     value_codes = {}
 
     for dataset in datasets:
-        with open(f"TEAM-TIME/{dataset:}/value_codes.yaml") as val_codes, open(f"TEAM-TIME/{dataset:}/column_codes.yaml") as col_codes:
+        with open(f"{dataset:}/value_codes.yaml") as val_codes, open(f"{dataset:}/column_codes.yaml") as col_codes:
             value_codes[dataset] = yaml.safe_load(val_codes)
             column_codes[dataset] = yaml.safe_load(col_codes)
 
-    responses= pd.read_csv(f"TEAM-TIME/respondents/atusresp_0321.csv")
+    responses= pd.read_csv(f"respondents/atusresp_0321.csv")
     
-    plot_all_histograms(responses, column_codes['respondents'], value_codes['respondents'], 'histograms')
+    plot_histogram(responses, 'TRDTOCC1', value_codes['respondents'])
