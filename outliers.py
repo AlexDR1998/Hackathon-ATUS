@@ -11,6 +11,18 @@ import yaml
 import numpy as np
 
 def outliers_NaNs(arr, outliers=[-3, -2, -1]):
+    """
+    Parameters
+    ----------
+    arr : Panda DataFrames array
+    outliers : float/int,
+        DESCRIPTION. Values in the array to replace with NaN. The default is [-3, -2, -1].
+
+    Returns
+    -------
+    arr_replace : TYPE
+        DESCRIPTION.
+    """
     
     arr_replace = arr.replace(outliers, value=np.nan)
     
