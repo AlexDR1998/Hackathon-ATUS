@@ -71,7 +71,7 @@ def plot_all_histograms(data, column_codes, value_codes, output_folder):
         ax.set_ylabel('Number of responses')
         plt.savefig(f"{output_folder:}/{column_code:}.png")
         plt.close()
-        
+  
 def plot_histogram(data, column_code, value_codes):
     """Plots a histogram of responses to each question (column column_code) asked in the survey.
     Saves the results to a output_folder.
@@ -106,7 +106,164 @@ def plot_histogram(data, column_code, value_codes):
     fig.tight_layout()
     plt.show()
         
+def Minutes_year_loc(location_id, data, title = None, xs = range(2006, 2021)):
+    """Plot the average minutes per day people spend doing activities at some specific location.
+    The options are:
+
+    1: "Respondent's home or yard",
+    2: "Respondent's workplace",
+    3: "Someone else's home",
+    4: 'Restaurant or bar',
+    5: 'Place of worship',
+    6: 'Grocery store',
+    7: 'Other store/mall',
+    8: 'School',
+    9: 'Outdoors away from home',
+    10: 'Library',
+    11: 'Other place',
+    12: 'Car, truck, or motorcycle (driver)',
+    13: 'Car, truck, or motorcycle (passenger)',
+    14: 'Walking',
+    15: 'Bus',
+    16: 'Subway/train',
+    17: 'Bicycle',
+    18: 'Boat/ferry',
+    19: 'Taxi/limousine service',
+    20: 'Airplane',
+    21: 'Other mode of transportation',
+    30: 'Bank',
+    31: 'Gym/health club',
+    32: 'Post Office',
+
+
+    Args:
+        activity_id (int): An integer associated to a specific location
+        data (_type_): The activity DataFrame
+        title (string, optional): A string to be used as the title of the plot. Defaults to None.
+        xs (iterable, optional): A range iterable with the years you want to plot the data. Defaults
+        is range(2006, 2021).
+    """
+
+
+    #Filter the data based on some location
+    filtered_df = data.query("TEWHERE == @location_id")
+
+    #Group many entries by the same person in a day to get the total time that person spent
+    grouped_df = filtered_df.groupby("TUCASEID")["TUACTDUR24"].sum()
+
+    #Get the entries per year and take an average
+    entry_id = grouped_df.index.tolist()
+    values = np.asarray(list(grouped_df))
+    years = np.asarray([int(str(x)[0:4]) for x in entry_id])
+    result = []
+    for i in xs:
+        mask = years==i
+        result.append(np.mean(values[mask]))
         
+    #Make the plot
+    plt.figure(figsize = (8,5))
+    plt.plot(xs,result, color = "black", marker = "o")
+    plt.xlabel("year", size = 20)
+    plt.ylabel("minutes per day", size = 20)
+    if title is not None:
+        plt.title(title)
+    plt.show()
+    plt.close()
+       
+def Minutes_year_precise(activity_id, data, title = None, xs = range(2006, 2021)):
+    """Plot the average minutes per day people spend doing a specific activity.
+    The options can be found at the columns yaml file.
+
+    Args:
+        activity_id (int): An integer associated to a specific activity
+        data (_type_): The activity DataFrame
+        title (string, optional): A string to be used as the title of the plot. Defaults to None.
+        xs (iterable, optional): A range iterable with the years you want to plot the data. Defaults
+        is range(2006, 2021).
+    """
+
+    #Filter the data by some activity
+    filtered_df = data.query("TRCODEP == @activity_id")
+
+    #Group many entries by the same person in a day to get the total time that person spent
+    grouped_df = filtered_df.groupby("TUCASEID")["TUACTDUR24"].sum()
+
+    #Get the entries per year and take an average
+    entry_id = grouped_df.index.tolist()
+    values = np.asarray(list(grouped_df))
+    years = np.asarray([int(str(x)[0:4]) for x in entry_id])
+    result = []
+
+    for i in xs:
+        mask = years==i
+        result.append(np.mean(values[mask]))
+
+    #Make the plot
+    plt.figure(figsize = (8,5))
+    plt.plot(xs,result, color = "black", marker = "o")
+    plt.xlabel("year", size = 20)
+    plt.ylabel("minutes per day", size = 20)
+    if title is not None:
+        plt.title(title)
+    plt.show()
+    plt.close()
+
+def Minutes_year_coarse(group_id, data, title = None, xs = range(2006, 2021)):
+    """Plot the average minutes per day people spend doing a specific activity.
+    The options are:
+
+    1: Personal care 
+    2: Household
+    3: Caring for and helping household members
+    4: Caring For & Helping Nonhousehold (NonHH) Members
+    5: Work & Work-Related Activities
+    6: Education
+    7: Consumer Purchases
+    8: Professional and Personal Care Services
+    9: Household activities
+    10:Government Services and Civic Oblitations 
+    11: Eating and Drinking
+    12: Socializing, relaxing and leisure
+    13: Sports, Exercise and Recreation
+    14: Religious and Spiritual Activities
+    15: Volunteer Activities
+    16: Telephone calls 
+    18: Traveling
+
+    Args:
+        activity_id (int): An integer associated to a specific activity
+        data (_type_): The activity DataFrame
+        title (string, optional): A string to be used as the title of the plot. Defaults to None.
+        xs (iterable, optional): A range iterable with the years you want to plot the data. Defaults
+        is range(2006, 2021).
+    """
+
+    #Filter the data by activity category
+    filtered_df = data.query("TRTIER1P == @group_id")
+
+    #Group many entries by the same person in a day to get the total time that person spent
+    grouped_df = filtered_df.groupby("TUCASEID")["TUACTDUR24"].sum()
+
+    #Get the entries per year and take an average
+    entry_id = grouped_df.index.tolist()
+    values = np.asarray(list(grouped_df))
+    years = np.asarray([int(str(x)[0:4]) for x in entry_id])
+    result = []
+            
+    for i in xs:
+        mask = years==i
+        result.append(np.mean(values[mask]))
+        
+    plt.figure(figsize = (8,5))
+    plt.plot(xs,result, color = "black", marker = "o")
+    plt.xlabel("year", size = 20)
+    plt.ylabel("minutes per day", size = 20)
+
+    if title is not None:
+        plt.title(title)
+    plt.show()
+    plt.close()
+
 if __name__ == "__main__":
     datasets = ['activity', 'respondents', 'roster']
 
